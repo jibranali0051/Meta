@@ -1,5 +1,5 @@
 {
-    "name": "MonsterLeague",
+    "name": "MetaTest",
     "globIgnorePaths": [
         "src/**/*.spec.lua",
         "Packages/**/*.spec.lua"
