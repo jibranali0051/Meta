@@ -1,7 +1,6 @@
 --[[
     DataController.lua
-    Author: Aaron Jay (seyai)
-    17 June 2021
+    Author: Jibran
     
     Stores and manages PlayerData Replica, listening to changes that can then be
     relayed to other controllers on the client

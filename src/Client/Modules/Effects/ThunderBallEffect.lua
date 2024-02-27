@@ -13,7 +13,6 @@ local Knit = require(Packages.Knit)
 -- Assets
 local Assets = ReplicatedStorage.Assets
 local vfx = Assets.VFX.ThunderBall
-local MonstersFolder = workspace:WaitForChild("Monsters")
 local NPCFolder = workspace:WaitForChild("NPCs")
 
 -- Modules
@@ -51,9 +50,9 @@ return function(source, potentialTarget)
 		or (source:GetAttribute("IsNPC") and Players:GetPlayerFromCharacter(potentialTarget) == player)
 	then
 		local WhiteList = {}
-		for _, monster in pairs(MonstersFolder:GetChildren()) do
-			if monster ~= character then
-				table.insert(WhiteList, monster)
+		for _, player in pairs(Players:GetPlayers()) do
+			if player.Character ~= character then
+				table.insert(WhiteList, player.Character)
 			end
 		end
 		for _, npc in pairs(NPCFolder:GetChildren()) do

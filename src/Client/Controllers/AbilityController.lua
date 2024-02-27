@@ -8,11 +8,9 @@
 -- Services
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local UserInputService = game:GetService("UserInputService")
+local ContextActionService = game:GetService("ContextActionService")
 local StarterPlayer = game:GetService("StarterPlayer")
 local StarterPlayerScripts = StarterPlayer.StarterPlayerScripts
-local ContextActionService = game:GetService("ContextActionService")
-
 -- Modules
 local Modules = StarterPlayerScripts.Modules
 local Abilties = Modules.Abilities
@@ -24,7 +22,6 @@ local Knit = require(Packages.Knit)
 
 -- Shared
 local Shared = ReplicatedStorage.Shared
-local MonsterData = require(Shared.MonsterData)
 local AbilityData = require(Shared.AbilityData)
 
 -- Tables
@@ -37,6 +34,9 @@ local keyBinds = {
 
 -- Player
 local Player = Knit.Player
+
+-- Consts
+local AVATAR_TAG = "Avatar"
 
 -- Knit
 local AbilityController = Knit.CreateController({
@@ -62,13 +62,19 @@ function AbilityController:KnitStart()
 	end)
 
 	self._abilityService.XpAdded:Connect(function(xp)
-		self._monsterService:UpdateXp(self._currentMonster, xp)
+		self._AvatarService:UpdateXp(xp)
 	end)
 	self._abilityService.NPCAbility:Connect(function(abilityName, npcModel)
 		self:PerformNPCAbility(abilityName, npcModel)
 	end)
 
-	self._monsterService:UpdateData()
+	Player.CharacterAdded:Connect(function(character)
+		if self._AvatarData.Level then
+			self:SetAbilities()
+		end
+	end)
+
+	self._AvatarService:UpdateData()
 end
 
 function AbilityController:PerformAbility(abilityName: string)
@@ -98,35 +104,7 @@ function AbilityController:PerformEffect(source, target, effectName, data)
 	self._effectModules[effectName](source, target, data)
 end
 
-function AbilityController:CreateLocalEffect(source, target, effectName, data)
-	if source == Player or source:GetAttribute("isNPC") then
-		if data and data.AbilityName and target then
-			local info = AbilityData[data.AbilityName]
-			if info then
-				if info.Damage then
-					if source:GetAttribute("isNPC") and target == Player.Character then
-						task.spawn(function()
-							self._abilityService:DamagePlayer(info.Damage)
-						end)
-					else
-						task.spawn(function()
-							target.Humanoid:TakeDamage(info.Damage)
-							self:CreateLocalEffect(source, target, "DamageCounter", info)
-						end)
-					end
-				end
-				if info.Xp and not source:GetAttribute("isNPC") then
-					task.spawn(function()
-						self._monsterService:UpdateXp(self._currentMonster, info.Xp)
-					end)
-				end
-			end
-		end
-		if not target or target == Player.Character or target:GetAttribute("isNPC") then
-			self:PerformEffect(source, target, effectName, data)
-		end
-	end
-end
+-- Start Ability Cooldown
 
 function AbilityController:StartCooldown(abilityName, cooldown)
 	local abilities = self._displayUI._abilitiesList:get()
@@ -141,33 +119,17 @@ function AbilityController:StartCooldown(abilityName, cooldown)
 	end
 end
 
-function AbilityController:ControlSwitched(isPlayer: boolean, monsterName: string)
+-- mapping abilities on keybind and fusion UI
+function AbilityController:SetAbilities()
 	function StartAbility(Event, InputState, InputObject)
 		if InputState == Enum.UserInputState.Begin then
 			self:PerformAbility(Event)
 		end
 	end
 	local abilitiesList = {}
-
-	if isPlayer then
-		local abilities = self._displayUI._abilitiesList:get()
-		for abilityName, abilityData in pairs(abilities) do
-			ContextActionService:UnbindAction(abilityName)
-		end
-		self._displayUI._enabled:set(false)
-		self._displayUI._abilitiesList:set(abilitiesList)
-		self._currentMonster = nil
-	else
-		self:SetAbilities(monsterName)
-	end
-end
-
-function AbilityController:SetAbilities(monsterName)
-	local abilitiesList = {}
 	self._abilityLocked = {}
-	local currentMonsterData = MonsterData[monsterName]
-	self._currentMonster = monsterName
-	local abilities = currentMonsterData.Abilities
+
+	local abilities = AbilityData
 	local index = 1
 	for abilityName, abilityData in pairs(abilities) do
 		local isAbilityLocked, abilityUnlockLevel = self:IsAbilityLocked(abilityName)
@@ -179,6 +141,7 @@ function AbilityController:SetAbilities(monsterName)
 			cooldown = 0,
 			totalCooldown = 0,
 			unlockLevel = abilityUnlockLevel,
+			Name = abilityData.Name
 		}
 		index += 1
 	end
@@ -186,40 +149,40 @@ function AbilityController:SetAbilities(monsterName)
 	self._displayUI._abilitiesList:set(abilitiesList)
 end
 
+-- check for ability unlock
 function AbilityController:IsAbilityLocked(abilityName)
 	local playerId = tostring(Player.UserId)
-	local myMonsterData = self._monsterData[playerId]
-	local currentMonsterData = myMonsterData[self._currentMonster]
-	local level = currentMonsterData.Level
-	local abilityData = MonsterData[self._currentMonster].Abilities[abilityName]
+	local myAvatarData = self._AvatarData[playerId]
+	local level = myAvatarData.Level
+	local abilityData = AbilityData[abilityName]
 	local unlockLevel = abilityData.UnlockLevel
 	return level < unlockLevel, unlockLevel
 end
 
-function AbilityController:SetMonsterLevel()
+-- set player level on Fusion UI
+function AbilityController:SetAvatarLevel()
 	local playerId = tostring(Player.UserId)
-	local myMonsterData = self._monsterData[playerId]
-	local currentMonsterData = myMonsterData[self._currentMonster]
-	local level = currentMonsterData.Level
-	self._displayUI._currentMonsterLevel:set(level)
-end
+	local myAvatarData = self._AvatarData[playerId]
+	local level = myAvatarData.Level
 
-function AbilityController:CheckForUnlocks() end
+	self._displayUI._currentAvatarLevel:set(level)
+end
 
 function AbilityController:KnitInit()
 	-- Services
 	self._abilityService = Knit.GetService("AbilityService")
-	self._monsterService = Knit.GetService("MonsterService")
+	self._AvatarService = Knit.GetService("AvatarService")
 
 	-- vars
-	self._monsterData = {}
-	self._currentMonster = nil
+	self._AvatarData = {}
 
-	self._monsterService.DataFoundSignal:Connect(function(monsterData: {})
-		self._monsterData = monsterData
-		if self._currentMonster then
-			self:SetMonsterLevel()
-			self:SetAbilities(self._currentMonster)
+	-- connections
+	self._AvatarService.DataFoundSignal:Connect(function(AvatarData: {})
+		self._AvatarData = AvatarData
+		self:SetAvatarLevel()
+		self:SetAbilities()
+		if not Player.Character then
+			Player.CharacterAdded:Wait()
 		end
 	end)
 end

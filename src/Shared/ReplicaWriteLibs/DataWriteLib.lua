@@ -19,9 +19,9 @@ local DEBUG_TAG = "[" .. script.Name .. "]"
 -- verify these on the server and stuff
 local DataWriteLib = {
 
-	-- Update Monster Configuration
-	UpdateMonsterConfig = function(replica, monsterData: table)
-		replica:SetValue("Monsters", monsterData)
+	-- Update Avatar Configuration
+	UpdateAvatarConfig = function(replica, AvatarData: table)
+		replica:SetValue("Avatar", AvatarData)
 	end,
 }
 

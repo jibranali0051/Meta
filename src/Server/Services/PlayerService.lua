@@ -1,13 +1,16 @@
 --[[
     PlayerService.lua
-    Author: Aaron Jay (se_yai)
-    23 July 2022
+    Author: Jibran
 
     Description: Manage player spawning and interactions with the server involving data
 ]]
+
+-- Services
 local Players = game:GetService("Players")
 local PhysicsService = game:GetService("PhysicsService")
+local CollectionService = game:GetService("CollectionService")
 
+-- Modules
 local ServerStorage = game:GetService("ServerStorage")
 local Modules = ServerStorage:WaitForChild("Modules")
 local PlayerContainer = require(Modules.PlayerContainer)
@@ -20,6 +23,8 @@ local Packages = ReplicatedStorage.Packages
 local Knit = require(Packages.Knit)
 local Signal = require(Packages.Signal)
 local Promise = require(Packages.Promise)
+
+local AVATAR_TAG = "Avatar"
 
 local PlayerService = Knit.CreateService({
 	Name = "PlayerService",
@@ -71,7 +76,6 @@ function PlayerService.Client:DidLoadReplica(player: Player)
 end
 
 function PlayerService:KnitStart()
-
 	self._joinTimes = {}
 
 	-- instantiate player function
@@ -99,15 +103,6 @@ function PlayerService:KnitStart()
 		-- initialize data
 		-- spawn player
 		player.CharacterAdded:Connect(function(character)
-			local playerHumanoid = character:WaitForChild("Humanoid", 3)
-			-- playerHumanoid.Died:Connect(function()
-			-- 	task.delay(Players.RespawnTime, function()
-			-- 		player:LoadCharacter()
-			-- 	end)
-			-- end)
-
-			
-
 			task.wait()
 			for _, v in ipairs(character:GetChildren()) do
 				if v:IsA("BasePart") then
@@ -116,6 +111,9 @@ function PlayerService:KnitStart()
 				end
 			end
 
+			task.wait(2)
+
+			CollectionService:AddTag(character, AVATAR_TAG)
 		end)
 	end
 
@@ -125,8 +123,6 @@ function PlayerService:KnitStart()
 		assert(self._players[player], "Could not find player object for " .. player.Name)
 		local playerContainer = self._players[player]
 
-
-		
 		playerContainer:Destroy()
 
 		self._players[player] = nil
@@ -136,10 +132,14 @@ function PlayerService:KnitStart()
 	Players.PlayerAdded:Connect(initPlayer)
 	Players.PlayerRemoving:Connect(cleanupPlayer)
 
+	task.wait(2)
 	-- load players that joined before
 	for _, player in Players:GetPlayers() do
 		if not self._players[player] then
 			initPlayer(player)
+		end
+		if not CollectionService:HasTag(player.Character, AVATAR_TAG) then
+			CollectionService:AddTag(player.Character, AVATAR_TAG)
 		end
 	end
 end

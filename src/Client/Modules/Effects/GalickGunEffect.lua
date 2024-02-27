@@ -13,7 +13,6 @@ local Knit = require(Packages.Knit)
 -- Assets
 local Assets = ReplicatedStorage.Assets
 local vfx = Assets.VFX.GalickGun
-local MonstersFolder = workspace:WaitForChild("Monsters")
 local NPCFolder = workspace:WaitForChild("NPCs")
 
 -- Modules
@@ -58,13 +57,7 @@ return function(source, potentialTarget)
 		EnableEffects(effect.End)
 	end)
 
-	print(source:GetAttribute("IsNPC"))
-	print(potentialTarget)
-
-	if
-		source == player.Character
-		or (source:GetAttribute("IsNPC") and potentialTarget == player.Character)
-	then
+	if source == player.Character or (source:GetAttribute("IsNPC") and potentialTarget == player.Character) then
 		local projectileData = {}
 
 		projectileData["Start"] = rootPart.Position
@@ -77,9 +70,9 @@ return function(source, potentialTarget)
 			HitBox:GetSquarePoints(CFrame.new((rootPart.CFrame * CFrame.new(0, 1, 1)).p, effect.CFrame.p), 5, 5)
 
 		local WhiteList = {}
-		for _, monster in pairs(MonstersFolder:GetChildren()) do
-			if monster ~= character then
-				table.insert(WhiteList, monster)
+		for _, player in pairs(Players:GetPlayers()) do
+			if player.Character ~= character then
+				table.insert(WhiteList, player.Character)
 			end
 		end
 		for _, npc in pairs(NPCFolder:GetChildren()) do

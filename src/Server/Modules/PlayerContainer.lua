@@ -2,8 +2,7 @@
 
 --[[
     PlayerContainer.lua
-    Author: Aaron Jay (seyai)
-    17 June 2021
+    Author: Jibran
     Create a container that handles Profile+ReplicaService, used for containing and mutating PlayerData
     Edit the `TEMPLATE_DATA` variable to setup expected PlayerData. Additions to this template will be propogated to returning
     players' data on join via `profile:Reconcile()`
@@ -20,7 +19,6 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Knit = require(ReplicatedStorage.Packages.Knit)
 local Janitor = require(game.ReplicatedStorage.Packages.Janitor)
 
-
 local PlayerContainer = {}
 PlayerContainer.__index = PlayerContainer
 
@@ -29,19 +27,16 @@ PlayerContainer.Tag = "PlayerContainer"
 local TEMPLATE_DATA = {
 
 	Coins = 100,
-	EquippedMonster = "",
-	Monsters = {
-		TemplateMonster = {
-			Level = 1,
-			Xp = 0,
-		},
+	Avatar = {
+		Level = 1,
+		Xp = 0,
 	},
 }
 
 local FORCE_MOCK_STORE = false
 
 local DATASTORE_NAME = "PlayerData_testing"
-local CURRENT_DATA_VERSION = 7
+local CURRENT_DATA_VERSION = 8
 local ProfileStore = ProfileService.GetProfileStore(DATASTORE_NAME .. CURRENT_DATA_VERSION, TEMPLATE_DATA)
 if game:GetService("RunService"):IsStudio() or FORCE_MOCK_STORE then
 	--ProfileStore = ProfileStore.Mock
@@ -73,7 +68,7 @@ function PlayerContainer.new(player: Player?): PlayerContainer
 		-- setup disconnect
 		profile:ListenToRelease(function()
 			self.Replica:Destroy()
-			player:Kick()
+		--	player:Kick()
 		end)
 
 		-- check first time load
@@ -103,7 +98,7 @@ function PlayerContainer.new(player: Player?): PlayerContainer
 			profile:Release()
 		end
 	else
-		player:Kick("Data profile could not be loaded. Are you already playing somewhere else?")
+		--player:Kick("Data profile could not be loaded. Are you already playing somewhere else?")
 	end
 
 	--print("[PlayerContainer] Created new container:", player.Name)

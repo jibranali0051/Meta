@@ -147,7 +147,8 @@ end
 
 function mob:AttackFunction()
 	if self.Target then
-		self.Model.PrimaryPart.CFrame = CFrame.lookAt(self.Model.PrimaryPart.CFrame.Position, self.Target.CFrame.Position)
+		self.Model.PrimaryPart.CFrame =
+			CFrame.lookAt(self.Model.PrimaryPart.CFrame.Position, self.Target.CFrame.Position)
 	end
 	task.wait(0.1)
 	local randomAbilityIndex = math.random(1, #self._abilities)
@@ -180,9 +181,13 @@ function mob:ChaseAndJump()
 
 	local moveToPos = self:GetMoveToPos()
 
+	local list = {}
+	for _, player in pairs(Players:GetPlayers()) do
+		table.insert(list, player.Character)
+	end
 	local rayData = RaycastParams.new()
 	rayData.FilterType = Enum.RaycastFilterType.Whitelist
-	rayData.FilterDescendantsInstances = { workspace.Monsters }
+	rayData.FilterDescendantsInstances = { list }
 
 	local origin1 = self.MyRootPart.Position
 	local origin2 = self.MyRootPart.Position + Vector3.new(0, 0, self.MyRootPart.Size.Z / 1.5)
@@ -273,7 +278,8 @@ function mob:FindTarget()
 		return
 	end
 
-	for i, v in ipairs(workspace.Monsters:GetChildren()) do
+	for i, player in ipairs(Players:GetPlayers()) do
+		local v = player.Character
 		local candidateHumanoid = v:FindFirstChild("Humanoid")
 		local candidateRootPart = v:FindFirstChild("HumanoidRootPart")
 

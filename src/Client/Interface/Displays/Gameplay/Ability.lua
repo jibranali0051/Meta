@@ -50,11 +50,11 @@ function Ability:Initialize()
 	self._enabled = Value(false)
 	self._isPlayer = Value(true)
 	self._AbilityExists = Value(false)
-	self._currentMonsterLevel = Value(1)
+	self._currentAvatarLevel = Value(1)
 
 	local currentUI = self:CreateUI()
 	currentUI.Parent = PlayerGui
-
+	print("init")
 	self._AbilityController._displayUI = self
 end
 
@@ -67,12 +67,12 @@ function Ability:CreateUI()
 			Name = abilityName,
 			Position = UDim2.fromScale(0.5, 0.5),
 			AnchorPoint = Vector2.new(0.5, 0.5),
-			Text = abilityName,
+			Text = dataTable.Name,
 			Size = UDim2.fromScale(0.8, 0.35),
 			Font = Enum.Font.SourceSansBold,
 			BackgroundTransparency = 1,
 			TextScaled = true,
-			TextColor3 = Color3.fromRGB(0, 0, 0),
+			TextColor3 = Color3.fromRGB(255, 255, 255),
 			ZIndex = 4,
 			TextXAlignment = Enum.TextXAlignment.Center,
 			TextYAlignment = Enum.TextYAlignment.Center,
@@ -82,8 +82,8 @@ function Ability:CreateUI()
 			Position = UDim2.fromScale(0.5, 0.5),
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			Text = Spring(Computed(function()
-				local currentMonsteLevel = self._currentMonsterLevel:get()
-				if dataTable.unlockLevel <= currentMonsteLevel then
+				local currentAvatarLevel = self._currentAvatarLevel:get()
+				if dataTable.unlockLevel <= currentAvatarLevel then
 					return ""
 				else
 					return "Unlocks at Level " .. tostring(dataTable.unlockLevel)
@@ -108,7 +108,7 @@ function Ability:CreateUI()
 			Font = Enum.Font.SourceSansBold,
 			BackgroundTransparency = 1,
 			TextScaled = true,
-			TextColor3 = Color3.fromRGB(0, 0, 0),
+			TextColor3 = Color3.fromRGB(255, 255, 255),
 			ZIndex = 4,
 			TextXAlignment = Enum.TextXAlignment.Center,
 			TextYAlignment = Enum.TextYAlignment.Center,
@@ -151,13 +151,13 @@ function Ability:CreateUI()
 			Name = abilityName,
 			Position = UDim2.fromScale(0.5, 0.5),
 			AnchorPoint = Vector2.new(0.5, 0.5),
-			Size = UDim2.fromScale(0.1, 0.8),
+			Size = UDim2.fromScale(0.8, 0.2),
 			BackgroundTransparency = 1,
 			BackgroundColor3 = Color3.new(0, 0, 0),
 			ScaleType = Enum.ScaleType.Stretch,
-			Image = "rbxassetid://15661327736",
-			HoverImage = "rbxassetid://15661327973",
-			PressedImage = "rbxassetid://15661327736",
+			Image = "rbxassetid://16539366994",
+			HoverImage = "rbxassetid://16539366994",
+			PressedImage = "rbxassetid://16539366994",
 			ZIndex = 4,
 			LayoutOrder = 1,
 			callback = function()
@@ -169,9 +169,9 @@ function Ability:CreateUI()
 					BackgroundColor3 = Color3.new(0, 0, 0),
 					BackgroundTransparency = Spring(Computed(function()
 						local abiltiesList = self._abilitiesList:get()
-						local currentMonsteLevel = self._currentMonsterLevel:get()
+						local currentAvatarLevel = self._currentAvatarLevel:get()
 						if abiltiesList[abilityName] then
-							if abiltiesList[abilityName].unlockLevel <= currentMonsteLevel then
+							if abiltiesList[abilityName].unlockLevel <= currentAvatarLevel then
 								return 1 - abiltiesList[abilityName].cooldown
 							else
 								return 0.1
@@ -204,24 +204,24 @@ function Ability:CreateUI()
 		ResetOnSpawn = false,
 		[Children] = {
 			New("Frame")({
-				AnchorPoint = Vector2.new(0.5, 1),
+				AnchorPoint = Vector2.new(0, 0.5),
 				Position = Spring(Computed(function()
 					if self._enabled:get() then
-						return UDim2.fromScale(0.5, 1)
+						return UDim2.fromScale(0, 0.5)
 					else
-						return UDim2.fromScale(0.5, 2)
+						return UDim2.fromScale(-1, 0.5)
 					end
 				end)),
-				Size = UDim2.fromScale(0.5, 0.8),
+				Size = UDim2.fromScale(0.8, 0.5),
 				BackgroundTransparency = 0.8,
 				BackgroundColor3 = Color3.new(0, 0, 0),
 				[Children] = {
 					New("UIAspectRatioConstraint")({
-						AspectRatio = 15,
+						AspectRatio = 0.5,
 					}),
 					New("UIListLayout")({
 						Padding = UDim.new(0.05, 0),
-						FillDirection = Enum.FillDirection.Horizontal,
+						FillDirection = Enum.FillDirection.Vertical,
 						HorizontalAlignment = Enum.HorizontalAlignment.Center,
 						VerticalAlignment = Enum.VerticalAlignment.Center,
 					}),

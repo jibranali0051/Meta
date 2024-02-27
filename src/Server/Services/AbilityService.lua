@@ -7,16 +7,15 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local ServerStorage = game:GetService("ServerStorage")
 
+-- Modules
 local Modules = ServerStorage:WaitForChild("Modules")
-local MonsterManager = require(Modules.MonsterManager)
 local Knockback = require(Modules.Effects.Knockback)
 
+-- Packages
 local Knit = require(ReplicatedStorage.Packages.Knit)
-local Signal = require(ReplicatedStorage.Packages.Signal)
 
 -- Shared
 local Shared = ReplicatedStorage.Shared
-local MonsterData = require(Shared.MonsterData)
 local AbilityData = require(Shared.AbilityData)
 
 local AbilityService = Knit.CreateService({
@@ -26,19 +25,17 @@ local AbilityService = Knit.CreateService({
 		EffectCreated = Knit.CreateSignal(),
 		AddEffect = Knit.CreateSignal(),
 		XpAdded = Knit.CreateSignal(),
-		NPCAbility = Knit.CreateSignal()
+		NPCAbility = Knit.CreateSignal(),
 	},
 })
 
 function AbilityService:KnitStart()
-	-- Services
-	self._monsterService = Knit.GetService("MonsterService")
-
 	self.Client.AddEffect:Connect(function(player: Player, source, target, effectName: string, effectData: table)
 		self:AddEffect(player, source, target, effectName, effectData)
 	end)
 end
 
+-- Adding VFX to all clients
 function AbilityService:AddEffect(player, source, target, effectName, effectData)
 	if effectData then
 		if effectData.AbilityName then

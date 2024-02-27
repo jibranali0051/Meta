@@ -1,8 +1,8 @@
 --[[
     ReplicatorController.lua
-    Author: Aaron Jay (seyai)
+    Author: Jibran
 
-    Custom middleware for ReplicaService (https://madstudioroblox.github.io/ReplicaService/) that ensures data for a
+    Custom middleware for ReplicaService that ensures data for a
     player is loaded before they can interact with the game
 ]]
 local PlayerScripts = game.Players.LocalPlayer:WaitForChild("PlayerScripts")

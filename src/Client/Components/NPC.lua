@@ -13,8 +13,6 @@ local Knit = require(ReplicatedStorage.Packages.Knit)
 -- Path
 local path = PathfindingService:CreatePath()
 
--- Folders
-local MonstersFolder = workspace:WaitForChild("Monsters")
 
 -- Player
 local Player = Knit.Player
@@ -51,8 +49,13 @@ function NPC:Start()
 	self._onCooldown = {}
 	self._abilityInPogress = false
 	self._pathInProgress = false
+	local characters = {}
+	for _, player in pairs(Players:GetPlayers()) do
+		table.insert(characters, player.Character)
+	end
+
 	self._overlapParams = OverlapParams.new()
-	self._overlapParams.FilterDescendantsInstances = { MonstersFolder }
+	self._overlapParams.FilterDescendantsInstances = { characters }
 	self._overlapParams.FilterType = Enum.RaycastFilterType.Whitelist
 	self._overlapParams.MaxParts = 3
 	self._connection = RunService.Heartbeat:Connect(function(deltaTime)
@@ -133,6 +136,13 @@ function NPC:OnStepped()
 	if self._abilityInPogress then
 		return
 	end
+
+	local characters = {}
+	for _, player in pairs(Players:GetPlayers()) do
+		table.insert(characters, player.Character)
+	end
+
+	self._overlapParams.FilterDescendantsInstances = { characters }
 	local parts =
 		workspace:GetPartBoundsInRadius(self.Instance.PrimaryPart.Position, DETECTION_DISTANCE, self._overlapParams)
 	if #parts > 1 then

@@ -16,7 +16,6 @@ local abilityName = "GalickGun"
 
 return function(npcModel)
 	if npcModel then
-		print(npcModel)
 		Knit.GetService("AbilityService").AddEffect:Fire(npcModel, player.Character, "GalickGunEffect")
 	else
 		Knit.GetService("AbilityService").AddEffect:Fire(player.Character, nil, "GalickGunEffect")

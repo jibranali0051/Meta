@@ -34,7 +34,9 @@ function NPCService:KnitStart()
 	self._NPCs = {}
 	task.wait(5)
 	for _, npc in pairs(NPCSpawns:GetChildren()) do
-		self:SpawnNPC(npc)
+		task.spawn(function()
+			self:SpawnNPC(npc)
+		end)
 	end
 end
 

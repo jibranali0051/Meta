@@ -27,47 +27,49 @@ local Children = Fusion.Children
 local Computed = Fusion.Computed
 local Spring = Fusion.Spring
 
+-- Player
+local Player = Knit.Player
+
 -- Initializing Component
-local Monster = Component.new({
-	Tag = "Monster",
+local Avatar = Component.new({
+	Tag = "Avatar",
 })
 
 -- Runtime function | Runs prior to :Start()
-function Monster:Construct() end
+function Avatar:Construct() end
 
 -- Runtime function | Runs following :Construct()
-function Monster:Start()
+function Avatar:Start()
 	task.wait(1)
 	self._level = Value(1)
 	self._xp = Value(0)
 	self._xpToNextLevel = Value(100)
 	self._health = Value(100)
-	self._playerId = self.Instance:GetAttribute("PlayerId")
+	self._playerId = tostring(Player.UserId)
 	self._name = self.Instance:GetAttribute("Name")
 	local gui = self:CreateUI()
 	gui.Parent = self.Instance:WaitForChild("HumanoidRootPart")
 
 	self.Instance.Humanoid.HealthChanged:Connect(function(health)
-		self._health:set(health)
+		self._health:set(math.floor(health))
 	end)
-	Knit.GetService("MonsterService").DataFoundSignal:Connect(function(monsterData: {})
-		self:UpdateUI(monsterData)
+	Knit.GetService("AvatarService").DataFoundSignal:Connect(function(AvatarData: {})
+		self:UpdateUI(AvatarData)
 	end)
-	Knit.GetService("MonsterService"):GetData()
+	Knit.GetService("AvatarService"):GetData()
 end
 
-function Monster:UpdateUI(monsterData)
-	local myData = monsterData[self._playerId]
-	local currentMonsterData = myData[self._name]
-	local level = currentMonsterData.Level
-	local xp = currentMonsterData.Xp
+function Avatar:UpdateUI(AvatarData)
+	local currentAvatarData = AvatarData[self._playerId]
+	local level = currentAvatarData.Level
+	local xp = currentAvatarData.Xp
 	local xpToNextLevel = LevelData["Level" .. tostring(level)]
 	self._level:set(level)
 	self._xp:set(xp)
 	self._xpToNextLevel:set(xpToNextLevel)
 end
 
-function Monster:CreateUI()
+function Avatar:CreateUI()
 	local levelLabelProps = {
 		Name = "Level",
 		Position = UDim2.fromScale(0.5, 0),
@@ -189,8 +191,8 @@ function Monster:CreateUI()
 	})
 end
 
-function Monster:RemoveGUI()
-	local gui = self.Instance:WaitForChild("Head"):FindFirstChild("Monster")
+function Avatar:RemoveGUI()
+	local gui = self.Instance:WaitForChild("Head"):FindFirstChild("Avatar")
 	if not gui then
 		return
 	end
@@ -198,6 +200,6 @@ function Monster:RemoveGUI()
 end
 
 -- Runs when tag is disconnected from object
-function Monster:Stop() end
+function Avatar:Stop() end
 
-return Monster
+return Avatar
